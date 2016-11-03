@@ -47,8 +47,6 @@ public class CatalogActivity extends AppCompatActivity {
         // To access our database, we instantiate our subclass of SQLiteOpenHelper
         // and pass the context, which is the current activity.
         mDbHelper = new PetDbHelper(this);
-
-        displayDatabaseInfo();
     }
 
     /**
@@ -123,5 +121,14 @@ public class CatalogActivity extends AppCompatActivity {
         } else {
             Log.v(LOG_TAG, "New Row ID: " + newRowId);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Display the state of the database here rather than in onCreate() because if a child
+        // Activity like EditorActivity finishes and returns to this activity, we want to display
+        // the state of the database correctly
+        displayDatabaseInfo();
     }
 }
