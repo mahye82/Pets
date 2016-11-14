@@ -78,10 +78,55 @@ public class CatalogActivity extends AppCompatActivity {
         );
 
         try {
+            // Create a header in the Text View that looks like this:
+            //
+            // The pets table contains <number of rows in Cursor> pets.
+            // _id - name - breed - gender - weight
+            //
+            // Then display the rows of the Cursor, with columns separated by hyphens.
+
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
             TextView displayView = (TextView) findViewById(R.id.text_view_pet);
             displayView.setText("Number of rows in pets database table: " + cursor.getCount());
+
+            // Add a blank line below this text
+            displayView.append("\n\n");
+
+            // Display the column names separated by hyphens
+            displayView.append(PetEntry._ID + " - " +
+                    PetEntry.COLUMN_PET_NAME + " - " +
+                    PetEntry.COLUMN_PET_BREED + " - " +
+                    PetEntry.COLUMN_PET_GENDER + " - " +
+                    PetEntry.COLUMN_PET_WEIGHT + "\n"
+            );
+
+            // Determine the indices for each column
+            int idColumnIndex = cursor.getColumnIndex(PetEntry._ID);
+            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
+            int breedColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
+            int genderColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
+            int weightColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
+
+            // Iterate through each of the returned rows in the Cursor
+            while(cursor.moveToNext()) {
+                // Use the column indices to retrieve the values for each column in the current row
+                int currentID = cursor.getInt(idColumnIndex);
+                String currentName = cursor.getString(nameColumnIndex);
+                String currentBreed = cursor.getString(breedColumnIndex);
+                int currentGender = cursor.getInt(genderColumnIndex);
+                int currentWeight = cursor.getInt(weightColumnIndex);
+
+                // Display the values for the current row, with columns separated by hyphens
+                displayView.append("\n" +
+                        currentID + " - " +
+                        currentName + " - " +
+                        currentBreed + " - " +
+                        currentGender + " - " +
+                        currentWeight
+                );
+            }
+
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
             // resources and makes it invalid.
