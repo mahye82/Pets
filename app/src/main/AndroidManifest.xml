@@ -37,6 +37,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CatalogActivity" />
         </activity>
+
+        <!-- Provider attributes:
+        'authorities' = the content authority that identifies the provider for this app.
+        'name' = the name of the Java class where the content provider can be found.
+        'exported' = this provider cannot be accessed by other apps. -->
+        <provider
+            android:authorities="com.example.android.pets"
+            android:name=".data.PetProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>
