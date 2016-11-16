@@ -54,9 +54,6 @@ public class CatalogActivity extends AppCompatActivity {
      * the pets database.
      */
     private void displayDatabaseInfo() {
-        // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
         // Define the projection (i.e. the column names you want returned in the Cursor object
         String[] projection = {
                 PetEntry._ID,
@@ -66,15 +63,22 @@ public class CatalogActivity extends AppCompatActivity {
                 PetEntry.COLUMN_PET_WEIGHT
         };
 
-        // Query the database to get a Cursor that contains all rows from the pets table
-        Cursor cursor = db.query(
-                PetEntry.TABLE_NAME,    // The table to query
-                projection,             // The columns to return
-                null,                   // The columns for the WHERE clause in SQLite
-                null,                   // The values for the WHERE clause in SQLite
-                null,                   // Don't group the rows
-                null,                   // Don't filter the rows
-                null                    // The sort order
+        // Perform a query on the ContentProvider using the ContentResolver.
+        // Use the PetEntry.CONTENT_URI to access the data from the pets table.
+        //
+        // The ContentResolver finds the correct ContentProvider to use (i.e. the PetProvider).
+        // It does this by checking the content authority section of the PetEntry.CONTENT_URI.
+        //
+        // After it's found the PetProvider, it and calls query() on it.
+        //
+        // Returns a Cursor that contains all rows from the pets table, for all columns
+        // since the projection includes all columns in the table, and no other selection was made
+        Cursor cursor = getContentResolver().query(
+                PetEntry.CONTENT_URI,       // The content URI
+                projection,                 // The columns to return for each row
+                null,                       // The columns for the WHERE clause in SQLite
+                null,                       // The values for the WHERE clause in SQLite
+                null                        // The sort order for returned rows
         );
 
         try {
