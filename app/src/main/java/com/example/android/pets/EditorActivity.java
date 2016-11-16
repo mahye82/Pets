@@ -16,7 +16,7 @@
 package com.example.android.pets;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -30,9 +30,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.android.pets.data.PetContract;
 import com.example.android.pets.data.PetContract.PetEntry;
-import com.example.android.pets.data.PetDbHelper;
 
 /**
  * Allows user to create a new pet or edit an existing one.
@@ -162,19 +160,18 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetEntry.COLUMN_PET_GENDER, mGender);
         values.put(PetEntry.COLUMN_PET_WEIGHT, weightInt);
 
-        // Get the data repository in write mode
-        SQLiteDatabase db = new PetDbHelper(this).getWritableDatabase();
-        
-        // Insert the values into the database as a new row
-        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
+        // Insert the new pet's attributes into the PetProvider, using the ContentResolver.
+        // Use the PetEntry.CONTENT_URI to indicate that we want to insert into the pets table.
+        // Receive the content URI of the new row.
+        Uri newRowUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
 
-        // If the row ID is -1, this means a new row was not entered into the database
-        if (newRowId < 0) {
+        // If the row URI is null, this means a new row was not successfully insert into the table
+        if (newRowUri == null) {
             // If a new row was not successfully added, display a Toast to that effect
             Toast.makeText(this, "Error with saving pet", Toast.LENGTH_SHORT).show();
         } else {
-            // Otherwise, display a Toast stating the new row's ID
-            Toast.makeText(this, "Pet saved with id: " + newRowId, Toast.LENGTH_SHORT).show();
+            // Otherwise, display a toast saying "Pet saved"
+            Toast.makeText(this, R.string.editor_insert_pet_successful, Toast.LENGTH_SHORT).show();
         }
     }
 }
