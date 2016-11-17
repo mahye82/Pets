@@ -11,8 +11,6 @@ import android.util.Log;
 
 import com.example.android.pets.data.PetContract.PetEntry;
 
-import static android.R.attr.id;
-
 /**
  * {@link ContentProvider} for Pets app.
  */
@@ -248,11 +246,34 @@ public class PetProvider extends ContentProvider {
     }
 
     /**
-     * Delete the data at the given selection and selection arguments.
+     * Deletes pets in the database with the given URI. Apply the deletion to the rows
+     * specified in the selection and selection arguments (which could be 0 or 1 or more pets).
      */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        // Get writable database
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        // Get the integer code produced by the URI matcher
+        final int match = sUriMatcher.match(uri);
+
+        // Some integer codes, like PETS and PET_ID are cases that mean a valid URI pattern was
+        // matched, and can be used to delete rows from the pets table
+        switch(match) {
+            // Delete all rows that match the selection and selection args
+            case PETS:
+                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+            // Delete a single row given by the ID in the URI
+            case PET_ID:
+                // For the PET_ID code, extract out the ID from the URI,
+                // so we know which row to delete. Selection will be "_id=?" and selection
+                // arguments will be a String array containing the actual ID passed in with the URI.
+                selection = PetEntry._ID + "=?";
+                selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri))};
+                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+        }
     }
 
     /**
