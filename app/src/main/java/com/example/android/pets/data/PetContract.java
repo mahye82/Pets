@@ -90,5 +90,15 @@ public final class PetContract {
         public static final int GENDER_UNKNOWN = 0;
         public static final int GENDER_MALE = 1;
         public static final int GENDER_FEMALE = 2;
+
+        /**
+         * Checks if given gender is a valid gender known by the app.
+         * @param gender is the integer representing gender that will be checked
+         * @return true if the given gender has the value of {@link #GENDER_UNKNOWN},
+         * {@link #GENDER_FEMALE} or {@link #GENDER_MALE}.
+         */
+        public static boolean isValidGender(int gender) {
+            return gender == GENDER_UNKNOWN || gender == GENDER_MALE || gender == GENDER_FEMALE;
+        }
     }
 }
