@@ -175,8 +175,76 @@ public class PetProvider extends ContentProvider {
      * Updates the data at the given selection and selection arguments, with the new ContentValues.
      */
     @Override
-    public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
-        return 0;
+    public int update(Uri uri, ContentValues contentValues, String selection,
+                      String[] selectionArgs) {
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return updatePet(uri, contentValues, selection, selectionArgs);
+            case PET_ID:
+                // For the PET_ID code, extract out the ID from the URI,
+                // so we know which row to update. Selection will be "_id=?" and selection
+                // arguments will be a String array containing the actual ID.
+                selection = PetEntry._ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                return updatePet(uri, contentValues, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+        }
+    }
+
+    /**
+     * Update pets in the database with the given content values. Apply the changes to the rows
+     * specified in the selection and selection arguments (which could be 0 or 1 or more pets).
+     * Return the number of rows that were successfully updated.
+     */
+    private int updatePet(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        // If the ContentValues object is empty (i.e. 0), then there's no point in proceeding
+        // further, because there's no values to update.
+        // The number of updated rows will be 0, so return that value.
+        if (values.size() == 0) {
+            return 0;
+        }
+
+        // INPUT VALIDATION
+        // Check if the user is attempting to update the "name" column for X number of rows
+        if (values.containsKey(PetEntry.COLUMN_PET_NAME)) {
+            // Check that the user's desired value for the name is not null.
+            String name = values.getAsString(PetEntry.COLUMN_PET_NAME);
+            if (name == null) {
+                throw new IllegalArgumentException("Pet requires a name");
+            }
+        }
+
+        // Check if the user is attempting to update the "gender" column for X number of rows
+        if (values.containsKey(PetEntry.COLUMN_PET_GENDER)) {
+            // Check that the user's desired value for gender is something valid, i.e. a known
+            // gender value - male, female or unknown.
+            // Gender cannot be updated to null either.
+            Integer gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER);
+            if (gender == null || !PetEntry.isValidGender(gender)) {
+                throw new IllegalArgumentException("Pet requires valid gender");
+            }
+        }
+
+        // Check if the user is attempting to update the "weight" column for X number of rows
+        if (values.containsKey(PetEntry.COLUMN_PET_WEIGHT)) {
+            // Check that the user's desired value for weight is greater than or equal to 0 kg.
+            // Weight cannot be updated to null either.
+            Integer weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
+            if (weight == null || weight < 0) {
+                throw new IllegalArgumentException("Pet requires valid weight");
+            }
+        }
+
+        // No need to check the breed. Any value is valid (including null).
+
+        // Get writable database
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        // Update the database with the given values.
+        // Returns the number of database rows affected by the update statement.
+        return database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
     }
 
     /**
