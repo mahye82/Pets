@@ -281,6 +281,21 @@ public class PetProvider extends ContentProvider {
      */
     @Override
     public String getType(Uri uri) {
-        return null;
+        // Get the integer code produced by the URI matcher
+        final int match = sUriMatcher.match(uri);
+
+        // Some integer codes, like PETS and PET_ID are cases that mean a valid URI pattern was
+        // matched, and can be used to return MIME types. A MIME type is a String that describes
+        // the type of the data stored at the input Uri.
+        switch (match) {
+            // Return the MIME type for the whole directory, aka ALL the rows of the pets table
+            case PETS:
+                return PetEntry.CONTENT_LIST_TYPE;
+            // Return the MIME type for a single item, aka a single row of the pets table
+            case PET_ID:
+                return PetEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
+        }
     }
 }
