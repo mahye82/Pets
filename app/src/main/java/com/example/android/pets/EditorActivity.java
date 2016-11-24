@@ -16,6 +16,8 @@
 package com.example.android.pets;
 
 import android.content.ContentValues;
+import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -67,6 +69,23 @@ public class EditorActivity extends AppCompatActivity {
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
         setupSpinner();
+
+        // Determine which Intent triggered the Activity, in order to figure out if we're
+        // inserting a new pet into the database or editing an existing one.
+        Intent intent = getIntent();
+        // Determine what the associated URI is, if any.
+        Uri currentPetUri = intent.getData();
+
+        // If no content URI was passed as an Intent extra, this means the Floating Action Button
+        // started this Activity
+        if (currentPetUri == null) {
+            // Set the title of the Activity in the app bar to "Add a Pet"
+            setTitle(getString(R.string.editor_activity_title_new_pet));
+        } else {
+            // Otherwise, a list item was clicked in the CatalogActivity.
+            // Set the title of the Activity in the app bar to "Edit Pet"
+            setTitle(getString(R.string.editor_activity_title_edit_pet));
+        }
     }
 
     /**

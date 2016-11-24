@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +19,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.android.pets.data.PetContract.PetEntry;
+
+import java.net.URI;
 
 /**
  * Displays list of pets that were entered and stored in the app.
@@ -65,6 +68,30 @@ public class CatalogActivity extends AppCompatActivity implements
 
         // Attach the PetCursorAdapter to the ListView.
         petListView.setAdapter(mCursorAdapter);
+
+
+        // Set up an OnItemClickListener which will open up EditorActivity if a list item is clicked
+        petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Create an Intent to start EditorActivity
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+
+                // Append the original content URI (content://com.example.android.pets/pets)
+                // with the row id of the list item that was clicked. For example, if the list item
+                // with the row ID = 3 was clicked, a URI of the form
+                // content://com.example.android.pets/pets/3 should be the result.
+                Uri currentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI, id);
+
+                Log.i(LOG_TAG, "The content URI being passed is " + currentPetUri.toString());
+
+                // Set the URI on the data field of the intent
+                intent.setData(currentPetUri);
+
+                // Launch the {@link EditorActivity} to display the data for the current pet.
+                startActivity(intent);
+            }
+        });
 
         // Initialise the Loader.
         getLoaderManager().initLoader(PET_LOADER, null, this);
