@@ -110,6 +110,12 @@ public class PetProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
+
+        // Set notification URI on the Cursor, so we know what content URI the
+        // Cursor was created for.
+        // If the data at this URI changes, then we know we need to update the Cursor.
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
         return cursor;
     }
 
@@ -163,6 +169,10 @@ public class PetProvider extends ContentProvider {
             Log.e(LOG_TAG, "Failed to insert row for " + uri);
             return null;
         }
+
+        // Since the ID was not -1, insertion into the pets table was successful.
+        // Notify all listeners that the content URI has changed, and the current Cursor is stale.
+        getContext().getContentResolver().notifyChange(uri, null);
 
         // Once we know the ID of the new row in the table,
         // return the new URI with the ID appended to the end of it
@@ -241,8 +251,16 @@ public class PetProvider extends ContentProvider {
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
         // Update the database with the given values.
+        int rowsUpdated = database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
+
+        // If rows were updated, notify all listeners that the content URI has changed,
+        // and the current Cursor is stale.
+        if (rowsUpdated > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
         // Returns the number of database rows affected by the update statement.
-        return database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
+        return rowsUpdated;
     }
 
     /**
@@ -257,12 +275,15 @@ public class PetProvider extends ContentProvider {
         // Get the integer code produced by the URI matcher
         final int match = sUriMatcher.match(uri);
 
+        int rowsDeleted;
+
         // Some integer codes, like PETS and PET_ID are cases that mean a valid URI pattern was
         // matched, and can be used to delete rows from the pets table
         switch(match) {
             // Delete all rows that match the selection and selection args
             case PETS:
-                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             // Delete a single row given by the ID in the URI
             case PET_ID:
                 // For the PET_ID code, extract out the ID from the URI,
@@ -270,10 +291,20 @@ public class PetProvider extends ContentProvider {
                 // arguments will be a String array containing the actual ID passed in with the URI.
                 selection = PetEntry._ID + "=?";
                 selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri))};
-                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }
+
+        // If rows were deleted, notify all listeners that the content URI has changed, and the
+        // current Cursor is stale.
+        if (rowsDeleted > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Returns the number of database rows affected by the deletion statement.
+        return rowsDeleted;
     }
 
     /**
