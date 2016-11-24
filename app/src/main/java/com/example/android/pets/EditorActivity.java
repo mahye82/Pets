@@ -16,7 +16,6 @@
 package com.example.android.pets;
 
 import android.app.LoaderManager;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -158,7 +157,7 @@ public class EditorActivity extends AppCompatActivity
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
                 // Save pet to database
-                insertPet();
+                savePet();
                 // Exit activity
                 finish();
                 return true;
@@ -178,7 +177,7 @@ public class EditorActivity extends AppCompatActivity
     /**
      * Takes user input from the editor and saves a new pet in the database.
      */
-    private void insertPet() {
+    private void savePet() {
         // Get the user input
         // NOTE: The gender input is already stored in mGender by the setOnItemSelectedListener()
         // of the setupSpinner() method above
@@ -195,18 +194,36 @@ public class EditorActivity extends AppCompatActivity
         values.put(PetEntry.COLUMN_PET_GENDER, mGender);
         values.put(PetEntry.COLUMN_PET_WEIGHT, weightInt);
 
-        // Insert the new pet's attributes into the PetProvider, using the ContentResolver.
-        // Use the PetEntry.CONTENT_URI to indicate that we want to insert into the pets table.
-        // Receive the content URI of the new row.
-        Uri newRowUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
+        // Determine if this is a new or existing pet by checking if mCurrentPetUri is null or not
+        if (mCurrentPetUri == null) {
+            // This is a NEW pet, so insert a new pet into the provider.
+            // Receive the content URI of the new row.
+            Uri newRowUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
 
-        // If the row URI is null, this means a new row was not successfully insert into the table
-        if (newRowUri == null) {
-            // If a new row was not successfully added, display a Toast to that effect
-            Toast.makeText(this, "Error with saving pet", Toast.LENGTH_SHORT).show();
+            // If the row URI is null, this means a new row was not successfully inserted into the table
+            if (newRowUri == null) {
+                // If a new row was not successfully added, display a Toast to that effect
+                Toast.makeText(this, R.string.editor_insert_pet_failed, Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, display a toast saying "Pet saved"
+                Toast.makeText(this, R.string.editor_insert_pet_successful, Toast.LENGTH_SHORT).show();
+            }
         } else {
-            // Otherwise, display a toast saying "Pet saved"
-            Toast.makeText(this, R.string.editor_insert_pet_successful, Toast.LENGTH_SHORT).show();
+            // Otherwise this is an EXISTING pet, so update the pet with content URI: mCurrentPetUri
+            // and pass in the new ContentValues. Pass in null for the selection and selection args
+            // because mCurrentPetUri will already identify the correct row in the database that
+            // we want to modify.
+            int rowsUpdated = getContentResolver().update(mCurrentPetUri, values, null, null);
+
+            // If the number of rows updated is 0, no rows were updated, i.e. the pet's values
+            // were not updated
+            if (rowsUpdated == 0) {
+                // Display a Toast explaining that there was an error with the update
+                Toast.makeText(this, R.string.editor_update_pet_failed, Toast.LENGTH_SHORT).show();
+            } else {
+                // Otherwise, display a toast saying "Pet updated"
+                Toast.makeText(this, R.string.editor_update_pet_successful, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
