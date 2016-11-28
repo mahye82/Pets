@@ -1,9 +1,11 @@
 package com.example.android.pets;
 
+import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -17,10 +19,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract.PetEntry;
-
-import java.net.URI;
 
 /**
  * Displays list of pets that were entered and stored in the app.
@@ -116,6 +117,7 @@ public class CatalogActivity extends AppCompatActivity implements
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
                 // Do nothing for now
+                showDeleteAllPetsConfirmationDialog();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -182,5 +184,58 @@ public class CatalogActivity extends AppCompatActivity implements
         //
         // Clear out the adapter's reference to the outdated Cursor.
         mCursorAdapter.swapCursor(null);
+    }
+
+    /**
+     * Prompt the user to confirm that they want to delete all pets.
+     */
+    private void showDeleteAllPetsConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the positive and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_all_pets_dialog_msg);
+
+        builder.setPositiveButton(R.string.delete_all_pets, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // User clicked the "Delete" button, so delete all pets
+                deleteAllPets();
+            }
+        });
+
+        builder.setNegativeButton(R.string.cancel_delete_all_pets, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the pet.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Deletes all the pets in the pets table of the database.
+     */
+    private void deleteAllPets() {
+        // Call the ContentResolver to delete all the pets. The PetEntry.CONTENT_URI
+        // specifies content://com.example.android.pets/pets
+        // Pass in null for the selection and selection args because we want to delete every
+        // row in the pets table.
+        int rowsDeleted = getContentResolver().delete(PetEntry.CONTENT_URI, null, null);
+
+        // If more than one row was deleted,
+        if (rowsDeleted > 0) {
+            // Show a toast explaining that every pet in the table was deleted
+            Toast.makeText(this, R.string.catalog_delete_pets_successful, Toast.LENGTH_SHORT).show();
+        } else {
+            // Show a toast explaining that the delete operation was unsuccessful
+            Toast.makeText(this, R.string.catalog_delete_pets_failed, Toast.LENGTH_SHORT).show();
+        }
     }
 }

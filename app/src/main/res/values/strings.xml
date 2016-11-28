@@ -89,5 +89,35 @@
     <!-- Subtitle text for the empty view that prompts the user to add a pet [CHAR LIMIT=50] -->
     <string name="empty_view_subtitle_text">Get started by adding a pet</string>
 
+    <!-- Toast message in editor when current pet was successfully deleted [CHAR LIMIT=NONE] -->
+    <string name="editor_delete_pet_successful">Pet deleted</string>
+
+    <!-- Toast message in editor when current pet has failed to be deleted [CHAR LIMIT=NONE] -->
+    <string name="editor_delete_pet_failed">Error with deleting pet</string>
+
+    <!-- Dialog message to ask the user to confirm deleting the current pet [CHAR LIMIT=NONE] -->
+    <string name="delete_dialog_msg">Delete this pet?</string>
+
+    <!-- Dialog button text for the option to confirm deleting the current pet [CHAR LIMIT=20] -->
+    <string name="delete">Delete</string>
+
+    <!-- Dialog button text for the option to cancel deletion of the current pet [CHAR LIMIT=20] -->
+    <string name="cancel">Cancel</string>
+
+    <!-- Toast message in catalog when all pets have been successfully deleted [CHAR LIMIT=NONE] -->
+    <string name="catalog_delete_pets_successful">Pets deleted</string>
+
+    <!-- Toast message in catalog when all pets have failed to be deleted [CHAR LIMIT=NONE] -->
+    <string name="catalog_delete_pets_failed">Error deleting pets</string>
+
+    <!-- Dialog message to ask the user to confirm deletion of all pets [CHAR LIMIT=NONE] -->
+    <string name="delete_all_pets_dialog_msg">Delete all pets?</string>
+
+    <!-- Dialog button text for the option to confirm deleting all pets [CHAR LIMIT=20] -->
+    <string name="delete_all_pets">Delete</string>
+
+    <!-- Dialog button text for the option to cancel deletion of all pets [CHAR LIMIT=20] -->
+    <string name="cancel_delete_all_pets">Cancel</string>
+
 
 </resources>
