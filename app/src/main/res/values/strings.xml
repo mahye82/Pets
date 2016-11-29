@@ -119,5 +119,11 @@
     <!-- Dialog button text for the option to cancel deletion of all pets [CHAR LIMIT=20] -->
     <string name="cancel_delete_all_pets">Cancel</string>
 
+    <!--List item text for a pet which has no name in the database [CHAR LIMIT=30]-->
+    <string name="list_item_unknown_name">Unknown name</string>
+
+    <!--List item text for a pet which has no breed in the database [CHAR LIMIT=30]-->
+    <string name="list_item_unknown_breed">Unknown breed</string>
+
 
 </resources>
